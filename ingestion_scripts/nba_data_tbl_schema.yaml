@@ -76,7 +76,8 @@ nba_com:
       - name: game_id
         sql_type: Integer
         python_type: int
-        foreign_key: tbl_game_detail.game_id
+        foreign_key: nba_com.tbl_game_detail.game_id
+        primary_key: true
       - name: person_id
         sql_type: Integer
         python_type: int
