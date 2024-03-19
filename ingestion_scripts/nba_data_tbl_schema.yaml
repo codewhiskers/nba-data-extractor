@@ -1,0 +1,72 @@
+nba_com:
+  tbl_game_detail:
+    primary_key: game_id
+    columns:
+      - name: game_id
+        sql_type: Float
+        python_type: float
+        primary_key: true
+      - name: game_date
+        sql_type: String
+        python_type: str
+      - name: season_year
+        sql_type: Integer
+        python_type: Int64
+      - name: season_type
+        sql_type: String
+        python_type: str
+      - name: attendance
+        sql_type: Integer
+        python_type: Int64
+      - name: sellout
+        sql_type: Integer 
+        python_type: Int64 
+      - name: duration
+        sql_type: Integer
+        python_type: Int64
+      - name: game_label
+        sql_type: String
+        python_type: str
+      - name: game_sublabel
+        sql_type: String
+        python_type: str
+      - name: series_game_number
+        sql_type: String
+        python_type: str
+      - name: series_text
+        sql_type: String
+        python_type: str
+      - name: home_team_id
+        sql_type: Float
+        python_type: float
+      - name: home_team_city
+        sql_type: String
+        python_type: str
+      - name: home_team_name
+        sql_type: String
+        python_type: str
+      - name: away_team_id
+        sql_type: Float
+        python_type: float
+      - name: away_team_city
+        sql_type: String
+        python_type: str
+      - name: away_team_name
+        sql_type: String
+        python_type: str
+      - name: home_team_score
+        sql_type: Integer
+        python_type: Int64
+      - name: away_team_score
+        sql_type: Integer
+        python_type: Int64
+      - name: final_quarter
+        sql_type: String
+        python_type: str
+      - name: national_tv_broadcast
+        sql_type: String
+        python_type: str
+      - name: source_file
+        sql_type: String
+        python_type: str
+        unique: true
