@@ -15,7 +15,6 @@ class NbaGameDetailTransformLoad(NbaData):
         self.create_table('nba_com', 'tbl_game_detail')
 
     def extract_and_filter_out_pulled_game_details(self):
-        # pdb.set_trace()
         self.files_to_transform = [x.split('.')[0] for x in os.listdir(self.nba_com_game_data_fp) if 'json' in x]
         files_transformed = self.read_table_with_query('SELECT source_file FROM nba_com.tbl_game_detail')
         files_transformed = files_transformed['source_file'].tolist()
@@ -104,16 +103,10 @@ class NbaGameDetailTransformLoad(NbaData):
             try:
                 game_object = json_file['props']['pageProps']['game']
                 analytics_object = json_file['props']['pageProps']['analyticsObject']
-                # df_players = self.extract_player_data(game_object)
-                # df_box = self.extract_box_score_data(game_object)
                 df_game_details = self.extract_game_data(game_object, analytics_object)
                 df_game_details['source_file'] = file
                 df_game_details = self.filter_and_set_dtypes(df_game_details, 'nba_com', 'tbl_game_detail')
                 self.load_data(df_game_details, 'nba_com', 'tbl_game_detail', progress_bar=False)
-                
-                # df_box.to_pickle(f'{self.nba_com_box_score_fp}/{file}_box.pkl')
-                # df_players.to_pickle(f'{self.nba_com_player_fp}/{file}_players.pkl')
-                # df_game_details.to_pickle(f'{self.nba_com_game_detail_fp}/{file}_game_details.pkl') 
 
             except Exception as e:
                 print(file)
