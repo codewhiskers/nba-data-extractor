@@ -67,8 +67,6 @@ class NbaData_DB_Config:
         for item in table_info['columns']:
             try:
                 filtered_df[item['name']] = filtered_df[item['name']].astype(item['python_type']) 
-                # filtered_df[item['name']] = filtered_df[item['name']].replace({'None': None, '': None})
-
             except Exception as e:
                 print(e)
                 print(item['name'])
@@ -82,19 +80,6 @@ class NbaData_DB_Config:
         self.create_schema_if_not_exists(schema_name)
         self.get_table_schema(schema_name, table_name)
         self.meta.create_all(self.engine)
-
-    # def map_python_type(type_name):
-    #         type_mapping = {
-    #             'Integer': int,
-    #             'String': str,
-    #             'Boolean': bool,
-    #             'Date': 'datetime.date',  # Using string repgit stresentation to indicate module import is necessary
-    #             'DateTime': 'datetime.datetime',
-    #             'Float': float,
-    #             'Text': str,
-    #         }
-    #         # Default to str if type_name is not found, adjust based on your application's needs
-    #         return type_mapping.get(type_name, str)  
          
     def _map_sqlalchemy_type(self, type_name):
         type_mapping = {
@@ -137,7 +122,6 @@ class NbaData_DB_Config:
                 Index('idx_' + '_'.join(idx['columns']), 
                     *[getattr(table.c, col_name) for col_name in idx['columns']],
                     unique=idx.get('unique', False))
-        
         return table
 
 
@@ -151,7 +135,7 @@ class NbaData_DB_Config:
             except Exception as e:
                 print(e)
                 pdb.set_trace()
-                return 0  # or handle the exception as needed
+                return 0 
             finally:
                 conn.commit()
                 conn.close()

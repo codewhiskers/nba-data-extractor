@@ -3,8 +3,8 @@ nba_com:
     primary_key: game_id
     columns:
       - name: game_id
-        sql_type: Float
-        python_type: float
+        sql_type: Integer
+        python_type: int
         primary_key: true
       - name: game_date
         sql_type: String
@@ -70,3 +70,23 @@ nba_com:
         sql_type: String
         python_type: str
         unique: true
+  tbl_player:
+    primary_key: personId
+    columns:
+      - name: game_id
+        sql_type: Integer
+        python_type: int
+        foreign_key: tbl_game_detail.game_id
+      - name: person_id
+        sql_type: Integer
+        python_type: int
+        primary_key: true
+      - name: first_name
+        sql_type: String
+        python_type: str
+      - name: last_name
+        sql_type: String
+        python_type: str
+      - name: source_file
+        sql_type: String
+        python_type: str
