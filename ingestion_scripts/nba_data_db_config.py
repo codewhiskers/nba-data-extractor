@@ -76,9 +76,10 @@ class NbaData_DB_Config:
         filtered_df.columns = [x.lower() for x in filtered_df.columns]
         return filtered_df
 
-    def create_table(self, schema_name, table_name):
+    def create_table(self, schema_name, table_names=[]):
         self.create_schema_if_not_exists(schema_name)
-        self.get_table_schema(schema_name, table_name)
+        for table_name in table_names:
+            self.get_table_schema(schema_name, table_name)
         self.meta.create_all(self.engine)
          
     def _map_sqlalchemy_type(self, type_name):
@@ -102,21 +103,17 @@ class NbaData_DB_Config:
         table_info = self.get_table_info(schema_name, table_name)
         columns = []
         for col in table_info['columns']:
-            column_args = {
-                'name': col['name'],
-                'primary_key': col.get('primary_key', False),
-                'type_': self._map_sqlalchemy_type(col['sql_type']),
-                'nullable': not col.get('not_null', False),
-                'unique' : col.get('unique', False)
-            }
-            if 'foreign_key' in col:
-                column_args['type_'] = self._map_sqlalchemy_type(col['sql_type'])
-                fk = ForeignKey(col['foreign_key'])
-                column_args['foreign_keys'] = [fk]
+            column = Column(col['name'],
+                            self._map_sqlalchemy_type(col['sql_type']),
+                            ForeignKey(col['foreign_key']) if 'foreign_key' in col else None,
+                            primary_key=col.get('primary_key', False),
+                            nullable=not col.get('not_null', False),
+                            unique=col.get('unique', False))
+            columns.append(column)
         
-            columns.append(Column(**column_args))
-
         table = Table(table_name, self.meta, *columns, schema=schema_name)  
+        # if table_name == 'tbl_player':
+        #     pdb.set_trace()
         if 'indexes' in table_info:
             for idx in table_info['indexes']:
                 Index('idx_' + '_'.join(idx['columns']), 
