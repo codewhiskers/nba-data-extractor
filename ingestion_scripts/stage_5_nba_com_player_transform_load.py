@@ -13,7 +13,6 @@ class NbaPlayersTransformLoad(NbaData):
         # Data Needed for this ingestion (Input Path)
         self.nba_com_game_data_fp = self.data_directory / 'nba_com/stage_3_raw_game_json'
         self.create_table('nba_com', ['tbl_game_detail', 'tbl_player']) 
-        # self.create_table('nba_com', 'tbl_player')
 
     def extract_and_filter_out_pulled_players(self):
         self.files_to_transform = [x.split('.')[0] for x in os.listdir(self.nba_com_game_data_fp) if 'json' in x]
