@@ -14,11 +14,7 @@ import os
 class NbaData_DB_Config:
     def __init__(self):
         self.base_directory = Path(__file__).parent.parent
-        self.tables = [
-            'tbl_game_detail',
-            'tbl_player',
-            'tbl_box'
-        ]
+
         self.user_name = os.environ.get('PSQL_DB_USER')
         if not self.user_name:
             raise ValueError('PSQL_DB_USER environment variable is not set')
@@ -31,9 +27,16 @@ class NbaData_DB_Config:
             try:
                 connection.execute(text(f'CREATE DATABASE {self.DB_Name}'))
             except ProgrammingError:
-                print(f"The database {self.DB_Name} already exists.")
+                # print(f"The database {self.DB_Name} already exists.")
+                pass
         self.engine = create_engine(f'postgresql://{self.user_name}@localhost:5432/{self.DB_Name}', echo=False)
         self.meta = MetaData()
+        self.tables = [
+            'tbl_game_info',
+            'tbl_player',
+            'tbl_box'
+            ]
+        self.create_table('nba_com_stage', self.tables) 
 
     def read_table(self, data, schema, dataset_name):
         df = pd.read_sql(f'SELECT * FROM {schema}.{dataset_name}', self.engine)
@@ -61,6 +64,7 @@ class NbaData_DB_Config:
     def filter_and_set_dtypes(self, df, schema_name, table_name):
         table_info = self.get_table_info(schema_name, table_name)
         columns_to_keep = [col['name'] for col in table_info['columns']]
+        df.reset_index(drop=True, inplace=True)
         # Step 1: Filter columns based on the dictionary keys
         filtered_df = df.filter(items=columns_to_keep)  
         # Step 2: Convert columns according to the dictionary
@@ -95,7 +99,7 @@ class NbaData_DB_Config:
         return type_mapping.get(type_name, String)  # Default to String if type_name is not found
     
     def get_table_info(self, schema_name, table_name):
-        with open('nba_data_tbl_schema.yaml', 'r') as f:
+        with open(f'{self.base_directory}/config/nba_com_tbl_schema.yaml', 'r') as f:
             schema_definition = yaml.safe_load(f)
         return schema_definition[schema_name][table_name]
 

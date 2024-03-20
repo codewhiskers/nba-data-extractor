@@ -1,6 +1,5 @@
-nba_com:
-  tbl_game_detail:
-    primary_key: game_id
+nba_com_stage:
+  tbl_game_info:
     columns:
       - name: game_id
         sql_type: Integer
@@ -71,14 +70,13 @@ nba_com:
         python_type: str
         unique: true
   tbl_player:
-    primary_key: personId
     columns:
       - name: game_id
         sql_type: Integer
         python_type: int
-        foreign_key: nba_com.tbl_game_detail.game_id
+        foreign_key: nba_com_stage.tbl_game_info.game_id
         primary_key: true
-      - name: person_id
+      - name: player_id
         sql_type: Integer
         python_type: int
         primary_key: true
@@ -88,6 +86,74 @@ nba_com:
       - name: last_name
         sql_type: String
         python_type: str
+      - name: source_file
+        sql_type: String
+        python_type: str
+  tbl_box:
+    columns:
+      - name: game_id
+        sql_type: Integer
+        python_type: Int64
+        foreign_key: nba_com_stage.tbl_game_info.game_id
+        primary_key: true
+      - name: player_id
+        sql_type: Integer
+        python_type: Int64
+        primary_key: true
+      - name: status
+        sql_type: String
+        python_type: str
+      - name: seconds
+        sql_type: Integer
+        python_type: Int64
+      - name: field_goals_made
+        sql_type: Integer
+        python_type: Int64
+      - name: field_goals_attempted
+        sql_type: Integer
+        python_type: Int64
+      - name: three_pointers_made
+        sql_type: Integer
+        python_type: Int64
+      - name: three_pointers_attempted
+        sql_type: Integer
+        python_type: Int64
+      - name: free_throws_made
+        sql_type: Integer
+        python_type: Int64
+      - name: free_throws_attempted
+        sql_type: Integer
+        python_type: Int64
+      - name: rebounds_offensive
+        sql_type: Integer
+        python_type: Int64
+      - name: rebounds_defensive
+        sql_type: Integer
+        python_type: Int64
+      - name: rebounds_total
+        sql_type: Integer
+        python_type: Int64
+      - name: assists
+        sql_type: Integer
+        python_type: Int64
+      - name: steals
+        sql_type: Integer
+        python_type: Int64
+      - name: blocks
+        sql_type: Integer
+        python_type: Int64
+      - name: turnovers
+        sql_type: Integer
+        python_type: Int64
+      - name: fouls_personal
+        sql_type: Integer
+        python_type: Int64
+      - name: points
+        sql_type: Integer
+        python_type: Int64
+      - name: plus_minus_points
+        sql_type: Integer
+        python_type: Int64
       - name: source_file
         sql_type: String
         python_type: str

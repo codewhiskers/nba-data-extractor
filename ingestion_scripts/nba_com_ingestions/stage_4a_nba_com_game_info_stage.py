@@ -1,26 +1,34 @@
 
 
 import pandas as pd
+import logging
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 import os
 from tqdm import tqdm
 import json
+import shutil
 import pdb
+import sys
+from pathlib import Path
+# Add the parent directory to the system path
+parent_dir = Path(__file__).resolve().parent.parent
+sys.path.append(str(parent_dir))
 from nba_data import NbaData
 
-class NbaGameDetailTransformLoad(NbaData):
+
+class NbaComGameInfoStage(NbaData):
     def __init__(self):
         super().__init__()
         # Data Needed for this ingestion (Input Path)
         self.nba_com_game_data_fp = self.data_directory / 'nba_com/stage_3_raw_game_json'
-        self.create_table('nba_com', 'tbl_game_detail')
+        self.error_directory = self.data_directory / 'nba_com/stage_4a_nba_com_game_info_stage_error_files'
 
     def extract_and_filter_out_pulled_game_details(self):
         self.files_to_transform = [x.split('.')[0] for x in os.listdir(self.nba_com_game_data_fp) if 'json' in x]
-        files_transformed = self.read_table_with_query('SELECT source_file FROM nba_com.tbl_game_detail')
+        files_transformed = self.read_table_with_query('SELECT DISTINCT source_file FROM nba_com_stage.tbl_game_info')
         files_transformed = files_transformed['source_file'].tolist()
         self.files_to_transform = [x for x in self.files_to_transform if x not in files_transformed]
 
-    
     def extract_game_data(self, game_object, analytics_object):
         # GameID
         game_id = game_object.get('gameId')
@@ -95,34 +103,65 @@ class NbaGameDetailTransformLoad(NbaData):
         }
         return pd.DataFrame([data])
 
+
+
     def extract_combine_data(self):
         error_files = []
         for file in tqdm(self.files_to_transform):
-            f = open(f'{self.nba_com_game_data_fp}/{file}.json')
+            src_file = f'{self.nba_com_game_data_fp}/{file}.json'
+            f = open(src_file)
             json_file = json.load(f)
             try:
-                game_object = json_file['props']['pageProps']['game']
+                game_object = json_file['props']['pageProps'].get('game', None)
+                if game_object is None:
+                    error_files.append(file)
+                    print(f'The file: {file} could not be ingested because the game object was not found.')
+                    self.move_error_file(src_file, self.error_directory, file)
+                    continue
                 analytics_object = json_file['props']['pageProps']['analyticsObject']
                 df_game_details = self.extract_game_data(game_object, analytics_object)
                 df_game_details['source_file'] = file
-                df_game_details = self.filter_and_set_dtypes(df_game_details, 'nba_com', 'tbl_game_detail')
-                self.load_data(df_game_details, 'nba_com', 'tbl_game_detail', progress_bar=False)
+                df_game_details = self.filter_and_set_dtypes(df_game_details, 'nba_com_stage', 'tbl_game_info')
+                self.load_data(df_game_details, 'nba_com_stage', 'tbl_game_info', progress_bar=False)
 
             except Exception as e:
                 print(file)
                 print(e)
                 error_files.append(file)
+                pdb.set_trace()
+                # dest_dir = self.nba_com_game_data_errors_fp  # Replace with the desired path
+                # try:
+                #     os.makedirs(dest_dir, exist_ok=True)
+                #     dest_file = os.path.join(dest_dir, f'{file}.json')
+                #     shutil.move(src_file, dest_file)
+                    
+                # except Exception as e:
+                #     print(f"Error moving file {file}.json: {e}")
         
-        pdb.set_trace()
-
-    def transform_all(self):
+    def stage(self):
+        """
+        Run Stage 4a: Staging NBA.com Game Info Data
+        """
+        logging.info('Beginning Stage 4a: Staging NBA.com Game Info Data')
+        logging.info('Extracting and Filtering Out Pulled Game Details')
         self.extract_and_filter_out_pulled_game_details()
-        self.extract_combine_data()
+        logging.info('Completed')
 
+        files_to_transform = self.files_to_transform
+        if len(files_to_transform) == 0:
+            logging.info('No new game details to transform')
+        else:
+            logging.info(f'Number of new game details to transform: {len(files_to_transform)}')
+            logging.info('Extracting and Combining Data')
+            self.extract_combine_data()
+            logging.info('Completed')
+
+        logging.info('Stage 4a Complete')
+        logging.info('====================================')
 
 if __name__ == '__main__':
-    n = NbaGameDetailTransformLoad()
-    n.transform_all()
+    n = NbaComGameInfoStage()
+    n.stage()
 
 
 

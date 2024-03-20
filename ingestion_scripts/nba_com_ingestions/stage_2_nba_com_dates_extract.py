@@ -1,22 +1,29 @@
 import requests
 from bs4 import BeautifulSoup
 from datetime import timedelta
+import logging
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 import json
 import time
 import os
 from tqdm import tqdm
 from random import uniform, choice, shuffle
-from nba_data import NbaData
 import pdb
 import re
 from datetime import datetime
+import sys
+from pathlib import Path
+# Add the parent directory to the system path
+parent_dir = Path(__file__).resolve().parent.parent
+sys.path.append(str(parent_dir))
+from nba_data import NbaData
 
 
 class NbaComDatesExtractor(NbaData):
     def __init__(self): 
         super().__init__()
         self.get_user_agent_list()
-        self.get_seasons()
+        # self.get_seasons()
         self.dates = []
         # Data Needed for this ingestion (Input Path)
         self.wikipedia_data_fp = self.data_directory / 'nba_com/stage_1_raw_wikipedia_html' 
@@ -25,24 +32,23 @@ class NbaComDatesExtractor(NbaData):
        
 
     def extract_game_dates(self, start_year):
-        wikipedia_pages = os.listdir(self.wikipedia_data_fp)
+        wikipedia_pages = [x for x in os.listdir(self.wikipedia_data_fp) if '.html' in x]
         for page in wikipedia_pages:
             file = open(f'{self.wikipedia_data_fp}/{page}')
-            
-            soup = BeautifulSoup(file, 'html.parser')
-            # Find the 'Duration' row by navigating from its 'th' to its 'td' sibling
-            duration_cell = soup.find('th', text='Duration').find_next_sibling('td')
-            # Extract all dates
-            text_content = duration_cell.get_text(strip=True)
-            dates = re.findall(r'\w+\s\d{1,2}(?:–\d{1,2})?,\s\d{4}', text_content)
-            
             # Get the first and last dates
             try:
+                soup = BeautifulSoup(file, 'html.parser')
+                # Find the 'Duration' row by navigating from its 'th' to its 'td' sibling
+                duration_cell = soup.find('th', string='Duration').find_next_sibling('td')
+                # Extract all dates
+                text_content = duration_cell.get_text(strip=True)
+                dates = re.findall(r'\w+\s\d{1,2}(?:–\d{1,2})?,\s\d{4}', text_content)
                 first_date = datetime.strptime(dates[0], '%B %d, %Y').date()
                 if first_date.year < start_year:
                     continue
                 last_date = datetime.strptime(re.sub("\d{1,2}–", '', dates[-1]), '%B %d, %Y').date()
-            except:
+            except Exception as e:
+                print(e)
                 pdb.set_trace()
             # Get dates in between the first and last date
             dates = [first_date + timedelta(days=x) for x in range((last_date-first_date).days + 1)]
@@ -90,14 +96,33 @@ class NbaComDatesExtractor(NbaData):
                 print(error_string)
                 time.sleep(60)
 
-    def RunNbaDateExtractor(self):
-        self.extract_game_dates(start_year = 2022)
+    def extract(self):
+        """
+        Run Stage 2: Generate and extract date links from nba.com.
+        """
+        logging.info('Beginning Stage 2')
+
+        logging.info('Generating date links to pull from nba.com')
+        self.extract_game_dates(start_year=2022)
+        logging.info('Completed')
+
+        logging.info('Filtering out Dates that have already been extracted')
         self.filter_out_pulled_dates_from_date_links()
-        self.get_date_data()
+        if len(self.dates) == 0:
+            logging.info('All dates have been pulled')
+        else:
+            logging.info(f'Number of Dates to Pull: {len(self.dates)}')
+            logging.info('Extracting Date pages from nba.com')
+            self.get_date_data()
+            logging.info('Completed')
+
+        logging.info('Stage 2 Complete')
+        logging.info('====================================')
+
 
 if __name__ == "__main__":
-    extractor = NbaComDatesExtractor()
-    extractor.RunNbaDateExtractor()
+    w = NbaComDatesExtractor()
+    w.extract()
 
 
 

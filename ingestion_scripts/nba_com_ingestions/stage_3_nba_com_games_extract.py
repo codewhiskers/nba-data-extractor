@@ -1,6 +1,8 @@
 import requests
 import pandas as pd
 import numpy as np
+import logging
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 from bs4 import BeautifulSoup
 from datetime import date
 import json
@@ -9,6 +11,11 @@ import os
 from tqdm import tqdm
 from random import uniform, choice, shuffle
 import pdb
+import sys
+from pathlib import Path
+# Add the parent directory to the system path
+parent_dir = Path(__file__).resolve().parent.parent
+sys.path.append(str(parent_dir))
 from nba_data import NbaData
 
 
@@ -86,14 +93,32 @@ class NbaComGamesExtractor(NbaData):
                 time.sleep(60)
             time.sleep(uniform(5, 10))
 
-    def RunNbaComGamesExtractor(self):
+    def extract(self):
+        """
+        Run Stage 3: Generate and extract game links from nba.com.
+        """
+        logging.info('Beginning Stage 3')
+
+        logging.info('Generating Game Links to pull from nba.com')
         self.extract_game_links()
+        logging.info('Completed')
+
+        logging.info('Filtering out Games that have already been extracted')
         self.filter_out_pulled_games_from_game_links()
-        self.get_game_data()
+        if len(self.game_links) == 0:
+            logging.info('All games have been pulled')
+        else:
+            logging.info(f'Number of Games to Pull: {len(self.game_links)}')
+            logging.info('Extracting Game pages from nba.com')
+            self.get_game_data()
+            logging.info('Completed')
+
+        logging.info('Stage 3 Complete')
+        logging.info('====================================')
         
 if __name__ == "__main__":
-    extractor = NbaComGamesExtractor()
-    extractor.RunNbaComGamesExtractor()
+    w = NbaComGamesExtractor()
+    w.extract()
 
 
 
