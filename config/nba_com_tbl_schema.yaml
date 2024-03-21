@@ -157,3 +157,66 @@ nba_com_stage:
       - name: source_file
         sql_type: String
         python_type: str
+  tbl_pbp:
+    columns:
+      - name: game_id
+        sql_type: Integer
+        python_type: int
+        foreign_key: nba_com_stage.tbl_game_info.game_id
+        primary_key: true
+      - name: action_id
+        sql_type: Integer
+        python_type: Int64
+        primary_key: true
+      - name: clock
+        sql_type: String
+        python_type: str
+      - name: period
+        sql_type: Integer
+        python_type: Int64
+      - name: team_id
+        sql_type: Integer
+        python_type: Int64 
+      - name: person_id
+        sql_type: Integer
+        python_type: Int64
+      - name: x_legacy
+        sql_type: Integer
+        python_type: Int64
+      - name: y_legacy
+        sql_type: Integer
+        python_type: Int64
+      - name: shot_distance
+        sql_type: Integer
+        python_type: Int64
+      - name: shot_result
+        sql_type: String
+        python_type: str
+      - name: is_field_goal
+        sql_type: Boolean
+        python_type: bool
+      - name: score_home
+        sql_type: Integer
+        python_type: Int64
+      - name: score_away
+        sql_type: Integer
+        python_type: Int64
+      - name: points_total
+        sql_type: Integer
+        python_type: Int64
+      - name: location
+        sql_type: String
+        python_type: str
+      - name: description
+        sql_type: String
+        python_type: str
+      - name: action_type
+        sql_type: String
+        python_type: str
+      - name: sub_type
+        sql_type: String
+        python_type: str
+      - name: source_file
+        sql_type: String
+        python_type: str
+        

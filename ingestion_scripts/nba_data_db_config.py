@@ -15,26 +15,40 @@ class NbaData_DB_Config:
     def __init__(self):
         self.base_directory = Path(__file__).parent.parent
 
-        self.user_name = os.environ.get('PSQL_DB_USER')
-        if not self.user_name:
+        self.db_user_name = os.environ.get('PSQL_RPI_DB_USER')
+        if not self.db_user_name:
             raise ValueError('PSQL_DB_USER environment variable is not set')
-        self.DB_Name = 'nba_data'
         
-        self.db_uri = f'postgresql://{self.user_name}@localhost:5432/'
-        self.engine = create_engine(self.db_uri, isolation_level='AUTOCOMMIT')
+        self.db_password = os.environ.get('PSQL_RPI_DB_PASS')
+        if not self.db_password:
+            raise ValueError('PSQL_DB_USER environment variable is not set')
+        
+        self.db_host = os.environ.get('PSQL_RPI_DB_HOST')
+        if not self.db_host:
+            raise ValueError('PSQL_RPI_DB_HOST environment variable is not set')
+        
+        self.db_port = os.environ.get('PSQL_RPI_DB_PORT')
+        if not self.db_port:
+            raise ValueError('PSQL_RPI_DB_PORT environment variable is not set')
+        
+        self.DB_Name = 'nba_data'
+        self.db_uri = f'postgresql://{self.db_user_name}:{self.db_password}@{self.db_host}:{self.db_port}'
+        
+        self.engine = create_engine(self.db_uri + '/postgres', isolation_level='AUTOCOMMIT')
         with self.engine.connect() as connection:
             connection.connection.commit()
             try:
                 connection.execute(text(f'CREATE DATABASE {self.DB_Name}'))
             except ProgrammingError:
-                # print(f"The database {self.DB_Name} already exists.")
                 pass
-        self.engine = create_engine(f'postgresql://{self.user_name}@localhost:5432/{self.DB_Name}', echo=False)
+            
+        self.engine = create_engine(self.db_uri + f'/{self.DB_Name}', echo=False)
         self.meta = MetaData()
         self.tables = [
             'tbl_game_info',
             'tbl_player',
-            'tbl_box'
+            'tbl_box',
+            'tbl_pbp'
             ]
         self.create_table('nba_com_stage', self.tables) 
 
