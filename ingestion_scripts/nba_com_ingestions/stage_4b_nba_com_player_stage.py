@@ -11,16 +11,16 @@ import pdb
 import sys
 from pathlib import Path
 # Add the parent directory to the system path
-parent_dir = Path(__file__).resolve().parent.parent
-sys.path.append(str(parent_dir))
-from nba_data import NbaData
+# parent_dir = Path(__file__).resolve().parent.parent
+# sys.path.append(str(parent_dir))
+from nba_com_main import NbaComMain
 
-class NbaComPlayersStage(NbaData):
+class NbaComPlayersStage(NbaComMain):
     def __init__(self):
         super().__init__()
         # Data Needed for this ingestion (Input Path)
-        self.nba_com_game_data_fp = self.data_directory / 'nba_com/stage_3_raw_game_json'
-        self.error_directory = self.data_directory / 'nba_com/stage_4b_nba_com_player_stage_error_files'
+        # self.nba_com_game_data_fp = self.data_directory / 'nba_com/stage_3_raw_game_json'
+        # self.error_directory = self.data_directory / 'nba_com/stage_4b_nba_com_player_stage_error_files'
 
     def extract_and_filter_out_pulled_players(self):
         self.files_to_transform = [x.split('.')[0] for x in os.listdir(self.nba_com_game_data_fp) if 'json' in x]
@@ -46,7 +46,7 @@ class NbaComPlayersStage(NbaData):
         return df_players
 
     def extract_combine_data(self):
-        error_files = []
+        # error_files = []
         for file in tqdm(self.files_to_transform):
             try:
                 src_file = f'{self.nba_com_game_data_fp}/{file}.json'
@@ -66,10 +66,10 @@ class NbaComPlayersStage(NbaData):
                 self.load_data(df_players, 'nba_com_stage', 'tbl_player', progress_bar=False)
 
             except Exception as e:
-                print(f"Error processing file {file}: {e}")
+                logging.info(f"Error processing file {file}: {e}")
                 # traceback.print_exc()  # Provides a stack trace which can be very helpful for debugging
-                error_files.append(file)
-                self.move_error_file(src_file, self.error_directory, file)
+                # error_files.append(file)
+                # self.move_error_file(src_file, self.error_directory, file)
         
 
     def stage(self):

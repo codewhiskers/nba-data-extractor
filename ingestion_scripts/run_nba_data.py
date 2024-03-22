@@ -1,9 +1,8 @@
 from pathlib import Path
 import sys
 import pdb
-# directory = Path(__file__).resolve().parent / 'nba_com_ingestions'
-# sys.path.append(str(directory))
-# pdb.set_trace()
+directory = Path(__file__).resolve().parent / 'nba_com_ingestions'
+sys.path.append(str(directory))
 
 
 from nba_com_ingestions.stage_1_wikipedia_nba_page_extract import WikipediaSeasonSummaryExtractor

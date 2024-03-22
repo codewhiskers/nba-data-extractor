@@ -15,11 +15,11 @@ import pdb
 import sys
 from pathlib import Path
 # Add the parent directory to the system path
-parent_dir = Path(__file__).resolve().parent.parent
-sys.path.append(str(parent_dir))
-from nba_data import NbaData
+# parent_dir = Path(__file__).resolve().parent.parent
+# sys.path.append(str(parent_dir))
+from nba_com_main import NbaComMain
 
-class NbaComPbpStage(NbaData):
+class NbaComPbpStage(NbaComMain):
     def __init__(self):
         super().__init__()
         # Data Needed for this ingestion (Input Path)

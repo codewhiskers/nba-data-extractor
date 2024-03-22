@@ -11,17 +11,17 @@ import pdb
 import sys
 from pathlib import Path
 # Add the parent directory to the system path
-parent_dir = Path(__file__).resolve().parent.parent
-sys.path.append(str(parent_dir))
-from nba_data import NbaData
+# parent_dir = Path(__file__).resolve().parent.parent
+# sys.path.append(str(parent_dir))
+from nba_com_main import NbaComMain
 
 
-class NbaComGameInfoStage(NbaData):
+class NbaComGameInfoStage(NbaComMain):
     def __init__(self):
         super().__init__()
         # Data Needed for this ingestion (Input Path)
-        self.nba_com_game_data_fp = self.data_directory / 'nba_com/stage_3_raw_game_json'
-        self.error_directory = self.data_directory / 'nba_com/stage_4a_nba_com_game_info_stage_error_files'
+        # self.nba_com_game_data_fp = self.data_directory / 'nba_com/stage_3_raw_game_json'
+        # self.error_directory = self.data_directory / 'nba_com/stage_4a_nba_com_game_info_stage_error_files'
 
     def extract_and_filter_out_pulled_game_details(self):
         self.files_to_transform = [x.split('.')[0] for x in os.listdir(self.nba_com_game_data_fp) if 'json' in x]
@@ -103,10 +103,7 @@ class NbaComGameInfoStage(NbaData):
         }
         return pd.DataFrame([data])
 
-
-
     def extract_combine_data(self):
-        error_files = []
         for file in tqdm(self.files_to_transform):
             src_file = f'{self.nba_com_game_data_fp}/{file}.json'
             f = open(src_file)
@@ -114,10 +111,9 @@ class NbaComGameInfoStage(NbaData):
             try:
                 game_object = json_file['props']['pageProps'].get('game', None)
                 if game_object is None:
-                    error_files.append(file)
                     print(f'The file: {file} could not be ingested because the game object was not found.')
-                    self.move_error_file(src_file, self.error_directory, file)
-                    continue
+                    # self.move_error_file(src_file, self.error_directory, file)
+                    raise ValueError("Game object not found in JSON")
                 analytics_object = json_file['props']['pageProps']['analyticsObject']
                 df_game_details = self.extract_game_data(game_object, analytics_object)
                 df_game_details['source_file'] = file
@@ -125,18 +121,7 @@ class NbaComGameInfoStage(NbaData):
                 self.load_data(df_game_details, 'nba_com_stage', 'tbl_game_info', progress_bar=False)
 
             except Exception as e:
-                print(file)
-                print(e)
-                error_files.append(file)
-                pdb.set_trace()
-                # dest_dir = self.nba_com_game_data_errors_fp  # Replace with the desired path
-                # try:
-                #     os.makedirs(dest_dir, exist_ok=True)
-                #     dest_file = os.path.join(dest_dir, f'{file}.json')
-                #     shutil.move(src_file, dest_file)
-                    
-                # except Exception as e:
-                #     print(f"Error moving file {file}.json: {e}")
+                logging.info(f"Error processing file {file}: {e}")
         
     def stage(self):
         """

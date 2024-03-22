@@ -14,12 +14,12 @@ import pdb
 import sys
 from pathlib import Path
 # Add the parent directory to the system path
-parent_dir = Path(__file__).resolve().parent.parent
-sys.path.append(str(parent_dir))
-from nba_data import NbaData
+# parent_dir = Path(__file__).resolve().parent.parent
+# sys.path.append(str(parent_dir))
+from nba_com_main import NbaComMain
 
 
-class NbaComGamesExtractor(NbaData):
+class NbaComGamesExtractor(NbaComMain):
     def __init__(self): 
         super().__init__()
         self.get_user_agent_list()
@@ -35,21 +35,24 @@ class NbaComGamesExtractor(NbaData):
         and appends them to the 'game_links' list.
         '''
         date_files = [x for x in os.listdir(self.nba_com_date_data_fp) if 'nba_com' in x]
-        for date_file in date_files:
-            date = date_file.split('nba_com_')[1].split('.')[0]
-            file = '{}/{}'.format(self.nba_com_date_data_fp, date_file)
-            f = open(file)
-            date_json_file = json.load(f)
-            if date_json_file['props']['pageProps']['gameCardFeed']['modules'] == []:
-                continue
-            game_cards = date_json_file['props']['pageProps']['gameCardFeed']['modules'][0]['cards']
-            for game_card in game_cards:
-                if game_card['cardData']['actions'] == []:
-                    continue
-                game_link = game_card['cardData']['actions'][2]['resourceLocator']['resourceUrl']
-                game_link = game_link.split('game/')[1]
-                game_link = '{}-{}'.format(date, game_link)
-                self.game_links.append(game_link)
+        for file in date_files:
+            try:
+                date = file.split('nba_com_')[1].split('.')[0]
+                file = '{}/{}'.format(self.nba_com_date_data_fp, file)
+                f = open(file)
+                date_json_file = json.load(f)
+                if date_json_file['props']['pageProps']['gameCardFeed']['modules'] == []:
+                    raise ValueError('No games found for date {}'.format(date))
+                game_cards = date_json_file['props']['pageProps']['gameCardFeed']['modules'][0]['cards']
+                for game_card in game_cards:
+                    if game_card['cardData']['actions'] == []:
+                        raise ValueError('No game link found for date {}'.format(date))
+                    game_link = game_card['cardData']['actions'][2]['resourceLocator']['resourceUrl']
+                    game_link = game_link.split('game/')[1]
+                    game_link = '{}-{}'.format(date, game_link)
+                    self.game_links.append(game_link)
+            except Exception as e:
+                logging.info(f"Error processing file {file}: {e}")
 
     def filter_out_pulled_games_from_game_links(self):
         '''

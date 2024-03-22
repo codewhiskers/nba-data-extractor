@@ -11,16 +11,16 @@ import os
 import sys
 from pathlib import Path
 # Add the parent directory to the system path
-parent_dir = Path(__file__).resolve().parent.parent
-sys.path.append(str(parent_dir))
-from nba_data import NbaData
+# parent_dir = Path(__file__).resolve().parent.parent
+# sys.path.append(str(parent_dir))
+from nba_com_main import NbaComMain
 
-class WikipediaSeasonSummaryExtractor(NbaData):
+class WikipediaSeasonSummaryExtractor(NbaComMain):
     def __init__(self):
         super().__init__()
         self.start_year = 1970
         self.current_year = datetime.now().year
-        self.wikipedia_data = self.data_directory / 'nba_com/stage_1_raw_wikipedia_html' 
+        # self.wikipedia_data = self.data_directory / 'nba_com/stage_1_raw_wikipedia_html' 
 
     def generate_urls(self):
         self.urls = []
@@ -38,7 +38,7 @@ class WikipediaSeasonSummaryExtractor(NbaData):
         to the list of games that have been pulled.
         '''
         # check to make sure this data hasn't already been scraped
-        wiki_pages_pulled = [x.split('.')[0] for x in os.listdir(self.wikipedia_data)]
+        wiki_pages_pulled = [x.split('.')[0] for x in os.listdir(self.stage_1_wikipedia_data_fp)]
         self.urls = [x for x in self.urls if x not in wiki_pages_pulled]
         shuffle(self.urls)
 

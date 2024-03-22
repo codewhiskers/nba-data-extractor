@@ -14,12 +14,12 @@ from datetime import datetime
 import sys
 from pathlib import Path
 # Add the parent directory to the system path
-parent_dir = Path(__file__).resolve().parent.parent
-sys.path.append(str(parent_dir))
-from nba_data import NbaData
+# parent_dir = Path(__file__).resolve().parent.parent
+# sys.path.append(str(parent_dir))
+from nba_com_main import NbaComMain
 
 
-class NbaComDatesExtractor(NbaData):
+class NbaComDatesExtractor(NbaComMain):
     def __init__(self): 
         super().__init__()
         self.get_user_agent_list()
@@ -48,8 +48,7 @@ class NbaComDatesExtractor(NbaData):
                     continue
                 last_date = datetime.strptime(re.sub("\d{1,2}–", '', dates[-1]), '%B %d, %Y').date()
             except Exception as e:
-                print(e)
-                pdb.set_trace()
+                logging.info(f"Error processing file {file}: {e}")
             # Get dates in between the first and last date
             dates = [first_date + timedelta(days=x) for x in range((last_date-first_date).days + 1)]
             # Filter out dates that are in the future
