@@ -22,7 +22,7 @@ class NbaComBoxStage(NbaComMain):
         self.error_directory = self.data_directory / 'nba_com/stage_4c_nba_com_box_error_files'
 
     def extract_and_filter_out_pulled_box_scores(self):
-        self.files_to_transform = [x.split('.')[0] for x in os.listdir(self.nba_com_game_data_fp) if 'json' in x]
+        self.files_to_transform = [x.split('.')[0] for x in os.listdir(self.stage_3_nba_com_game_data_fp) if 'json' in x]
         files_transformed = self.read_table_with_query('SELECT DISTINCT source_file FROM nba_com_stage.tbl_box')
         files_transformed = files_transformed['source_file'].tolist()
         self.files_to_transform = [x for x in self.files_to_transform if x not in files_transformed]
@@ -82,7 +82,7 @@ class NbaComBoxStage(NbaComMain):
     def extract_combine_data(self):
         for file in tqdm(self.files_to_transform):
             try:
-                src_file = f'{self.nba_com_game_data_fp}/{file}.json'
+                src_file = f'{self.stage_3_nba_com_game_data_fp}/{file}.json'
                 with open(src_file) as f:
                     json_file = json.load(f)
 

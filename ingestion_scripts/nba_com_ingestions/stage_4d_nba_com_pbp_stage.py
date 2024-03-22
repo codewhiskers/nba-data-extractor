@@ -23,11 +23,11 @@ class NbaComPbpStage(NbaComMain):
     def __init__(self):
         super().__init__()
         # Data Needed for this ingestion (Input Path)
-        self.nba_com_game_data_fp = self.data_directory / 'nba_com/stage_3_raw_game_json'
-        self.error_directory = self.data_directory / 'nba_com/stage_4d_nba_com_pbp_error_files'
+        # self.nba_com_game_data_fp = self.data_directory / 'nba_com/stage_3_raw_game_json'
+        # self.error_directory = self.data_directory / 'nba_com/stage_4d_nba_com_pbp_error_files'
 
     def extract_and_filter_out_pulled_pbp(self):
-        self.files_to_transform = [x.split('.')[0] for x in os.listdir(self.nba_com_game_data_fp) if 'json' in x]
+        self.files_to_transform = [x.split('.')[0] for x in os.listdir(self.stage_3_nba_com_game_data_fp) if 'json' in x]
         self.files_to_transform  = [
             x for x in self.files_to_transform 
             if int("".join(re.match(r'(\d{4})-(\d{2})', x).groups())) > 199607
@@ -70,7 +70,7 @@ class NbaComPbpStage(NbaComMain):
     def extract_combine_data(self):
         for file in tqdm(self.files_to_transform):
             try:
-                src_file = f'{self.nba_com_game_data_fp}/{file}.json'
+                src_file = f'{self.stage_3_nba_com_game_data_fp}/{file}.json'
                 with open(src_file) as f:
                     json_file = json.load(f)
                 game_id =  json_file['props']['pageProps'].get('game').get('gameId') 
