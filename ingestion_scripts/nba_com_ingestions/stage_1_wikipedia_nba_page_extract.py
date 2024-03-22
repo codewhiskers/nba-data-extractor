@@ -50,7 +50,7 @@ class WikipediaSeasonSummaryExtractor(NbaComMain):
             if response.status_code == 200:
                 soup = BeautifulSoup(response.text, 'html.parser')
                 file_name = url.split('/')[-1]
-                output_file_path = f'{self.wikipedia_data}/{file_name}.html'
+                output_file_path = f'{self.stage_1_wikipedia_data_fp}/{file_name}.html'
                 with open(output_file_path, "w", encoding='utf-8') as file:
                     file.write(str(soup))
                 time.sleep(uniform(5, 10))
