@@ -8,11 +8,7 @@ import time
 from random import uniform, shuffle
 from tqdm import tqdm
 import os
-import sys
 from pathlib import Path
-# Add the parent directory to the system path
-# parent_dir = Path(__file__).resolve().parent.parent
-# sys.path.append(str(parent_dir))
 from nba_com_main import NbaComMain
 
 class WikipediaSeasonSummaryExtractor(NbaComMain):
@@ -41,7 +37,6 @@ class WikipediaSeasonSummaryExtractor(NbaComMain):
         wiki_pages_pulled = [x.split('.')[0] for x in os.listdir(self.stage_1_wikipedia_data_fp)]
         self.urls = [x for x in self.urls if x not in wiki_pages_pulled]
         shuffle(self.urls)
-
 
     def extract_wikipedia_pages(self):
         for url in tqdm(self.urls):

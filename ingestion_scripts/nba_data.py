@@ -8,6 +8,18 @@ import pdb
 from nba_data_db_config import NbaData_DB_Config
 import os
 import shutil
+import logging
+
+# Set up logging
+from pathlib import Path
+logging_path = Path(__file__).parent.parent / 'ingestion_logs'
+os.makedirs(logging_path, exist_ok=True)
+date = date.today().strftime('%Y-%m-%d')
+logging.basicConfig(level=logging.INFO,  # Set minimum logging level to INFO
+                    format='%(asctime)s - %(levelname)s - %(message)s',  # Include timestamp, log level, and message
+                    datefmt='%Y-%m-%d %H:%M:%S',  # Timestamp format
+                    handlers=[logging.FileHandler(f'{logging_path}/{date}.log', mode='a'),  # Append to the log file if it exists
+                              logging.StreamHandler()])  # Also log to standard output (console)
 
 class NbaData(NbaData_DB_Config):
     def __init__(self):

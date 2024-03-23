@@ -16,4 +16,3 @@ class NbaComMain(NbaData):
         os.makedirs(self.stage_1_wikipedia_data_fp, exist_ok=True)
         os.makedirs(self.stage_2_nba_com_date_data_fp, exist_ok=True)
         os.makedirs(self.stage_3_nba_com_game_data_fp, exist_ok=True)   
-

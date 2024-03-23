@@ -5,7 +5,6 @@ import os
 import traceback
 from tqdm import tqdm
 import logging
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 import json
 import pdb
 import sys
@@ -67,9 +66,6 @@ class NbaComPlayersStage(NbaComMain):
 
             except Exception as e:
                 logging.info(f"Error processing file {file}: {e}")
-                # traceback.print_exc()  # Provides a stack trace which can be very helpful for debugging
-                # error_files.append(file)
-                # self.move_error_file(src_file, self.error_directory, file)
         
 
     def stage(self):

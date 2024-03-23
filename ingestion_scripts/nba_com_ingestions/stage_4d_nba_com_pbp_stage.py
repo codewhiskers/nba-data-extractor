@@ -2,18 +2,13 @@
 
 import pandas as pd
 import os
-import logging
 import re
-logging.basicConfig(level=logging.INFO,  # Set minimum logging level to INFO
-                    format='%(asctime)s - %(levelname)s - %(message)s',  # Include timestamp, log level, and message
-                    datefmt='%Y-%m-%d %H:%M:%S',  # Timestamp format
-                    handlers=[logging.FileHandler('test.log', mode='a'),  # Append to the log file if it exists
-                              logging.StreamHandler()])  # Also log to standard output (console)
 from tqdm import tqdm
 import json
 import pdb
 import sys
 from pathlib import Path
+import logging
 # Add the parent directory to the system path
 # parent_dir = Path(__file__).resolve().parent.parent
 # sys.path.append(str(parent_dir))

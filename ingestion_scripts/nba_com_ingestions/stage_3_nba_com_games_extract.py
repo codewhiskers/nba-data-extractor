@@ -2,7 +2,6 @@ import requests
 import pandas as pd
 import numpy as np
 import logging
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 from bs4 import BeautifulSoup
 from datetime import date
 import json
@@ -25,21 +24,21 @@ class NbaComGamesExtractor(NbaComMain):
         self.get_user_agent_list()
         self.game_links = []
         # Data Needed for this ingestion (Input Path)
-        self.nba_com_date_data_fp = self.data_directory / 'nba_com/stage_2_raw_date_json'
+        # self.nba_com_date_data_fp = self.data_directory / 'nba_com/stage_2_raw_date_json'
         # Export Data Directory (Output Path)
-        self.nba_com_game_data_fp = self.data_directory / 'nba_com/stage_3_raw_game_json'
+        # self.nba_com_game_data_fp = self.data_directory / 'nba_com/stage_3_raw_game_json'
     
     def extract_game_links(self):
         '''
         This method extracts game links from JSON files located in the 'stage_1_raw_date_json' directory,
         and appends them to the 'game_links' list.
         '''
-        date_files = [x for x in os.listdir(self.nba_com_date_data_fp) if 'nba_com' in x]
+        date_files = [x for x in os.listdir(self.stage_2_nba_com_date_data_fp) if 'nba_com' in x]
         for file in date_files:
             try:
                 date = file.split('nba_com_')[1].split('.')[0]
-                file = '{}/{}'.format(self.nba_com_date_data_fp, file)
-                f = open(file)
+                src_file = '{}/{}'.format(self.stage_2_nba_com_date_data_fp, file)
+                f = open(src_file)
                 date_json_file = json.load(f)
                 if date_json_file['props']['pageProps']['gameCardFeed']['modules'] == []:
                     raise ValueError('No games found for date {}'.format(date))
@@ -61,7 +60,7 @@ class NbaComGamesExtractor(NbaComMain):
         to the list of games that have been pulled.
         '''
         # check to make sure this data hasn't already been scraped
-        games_links_pulled = [x.split('.')[0] for x in os.listdir(self.nba_com_game_data_fp)]
+        games_links_pulled = [x.split('.')[0] for x in os.listdir(self.stage_3_nba_com_game_data_fp)]
         self.game_links = [x for x in self.game_links if x not in games_links_pulled]
         shuffle(self.game_links)
 
@@ -87,7 +86,7 @@ class NbaComGamesExtractor(NbaComMain):
                 game_json_file = game_json_file.getText()
                 game_json_file = json.loads(game_json_file)
                 file_name = f'{game_link}.json'
-                output_file_path = f'{self.nba_com_game_data_fp}/{file_name}'
+                output_file_path = f'{self.stage_3_nba_com_game_data_fp}/{file_name}'
                 with open(output_file_path, 'w') as outfile:
                     json.dump(game_json_file, outfile)
             else:

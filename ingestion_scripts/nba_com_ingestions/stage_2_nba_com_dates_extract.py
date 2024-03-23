@@ -2,7 +2,6 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import timedelta
 import logging
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 import json
 import time
 import os
@@ -11,11 +10,6 @@ from random import uniform, choice, shuffle
 import pdb
 import re
 from datetime import datetime
-import sys
-from pathlib import Path
-# Add the parent directory to the system path
-# parent_dir = Path(__file__).resolve().parent.parent
-# sys.path.append(str(parent_dir))
 from nba_com_main import NbaComMain
 
 
@@ -26,15 +20,15 @@ class NbaComDatesExtractor(NbaComMain):
         # self.get_seasons()
         self.dates = []
         # Data Needed for this ingestion (Input Path)
-        self.wikipedia_data_fp = self.data_directory / 'nba_com/stage_1_raw_wikipedia_html' 
+        # self.wikipedia_data_fp = self.data_directory / 'nba_com/stage_1_raw_wikipedia_html' 
         # Export Data Directory (Output Path)
-        self.nba_com_date_data_fp = self.data_directory / 'nba_com/stage_2_raw_date_json'
+        # self.nba_com_date_data_fp = self.data_directory / 'nba_com/stage_2_raw_date_json'
        
 
     def extract_game_dates(self, start_year):
-        wikipedia_pages = [x for x in os.listdir(self.wikipedia_data_fp) if '.html' in x]
+        wikipedia_pages = [x for x in os.listdir(self.stage_1_wikipedia_data_fp) if '.html' in x]
         for page in wikipedia_pages:
-            file = open(f'{self.wikipedia_data_fp}/{page}')
+            file = open(f'{self.stage_1_wikipedia_data_fp}/{page}')
             # Get the first and last dates
             try:
                 soup = BeautifulSoup(file, 'html.parser')
@@ -59,7 +53,7 @@ class NbaComDatesExtractor(NbaComMain):
         '''
         This method filters out dates that have already been scraped from the 'stage_1_raw_date_json' directory.
         '''
-        dates_pulled = [x for x in os.listdir(self.nba_com_date_data_fp) if 'nba_com' in x]
+        dates_pulled = [x for x in os.listdir(self.stage_2_nba_com_date_data_fp) if 'nba_com' in x]
         dates_pulled = [x.split('nba_com_')[1].split('.')[0] for x in dates_pulled]
         self.dates = [str(x) for x in self.dates if x not in dates_pulled]
         shuffle(self.dates)
@@ -86,7 +80,7 @@ class NbaComDatesExtractor(NbaComMain):
                 date_json_file = json.loads(date_json_file)
 
                 file_name = f'nba_com_{date}.json'
-                output_file_path = f'{self.nba_com_date_data_fp}/{file_name}'
+                output_file_path = f'{self.stage_2_nba_com_date_data_fp}/{file_name}'
                 with open(output_file_path, 'w') as outfile:
                     json.dump(date_json_file, outfile)
                 time.sleep(uniform(5, 10))
